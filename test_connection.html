@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Connection Test</title>
+    <style>
+        body { font-family: Arial; padding: 40px; background: #f5f5f5; }
+        .test { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        button { background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #1976D2; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Perfume Finder - Connection Test</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="runTests()">Run Tests</button>
+    
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Running tests...</p>';
+            
+            let html = '';
+            
+            // Test 1: Check if backend is reachable
+            try {
+                const response = await fetch('http://localhost:5000/api/perfumes');
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    html += `
+                        <div class="test success">
+                            <h3>✅ Test 1: Backend Connection - PASSED</h3>
+                            <p><strong>Status:</strong> ${response.status} OK</p>
+                            <p><strong>Perfumes found:</strong> ${data.length}</p>
+                            <p><strong>First perfume:</strong> ${data[0].name} by ${data[0].brand}</p>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="test error">
+                            <h3>❌ Test 1: Backend Connection - FAILED</h3>
+                            <p>Backend is responding but returned no data</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                html += `
+                    <div class="test error">
+                        <h3>❌ Test 1: Backend Connection - FAILED</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Possible causes:</strong></p>
+                        <ul>
+                            <li>Backend server is not running on port 5000</li>
+                            <li>CORS is blocking the request</li>
+                            <li>Firewall is blocking localhost connections</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Test 2: Check notes endpoint
+            try {
+                const response = await fetch('http://localhost:5000/api/notes');
+                const data = await response.json();
+                
+                html += `
+                    <div class="test success">
+                        <h3>✅ Test 2: Notes Endpoint - PASSED</h3>
+                        <p><strong>Notes found:</strong> ${data.length}</p>
+                    </div>
+                `;
+            } catch (error) {
+                html += `
+                    <div class="test error">
+                        <h3>❌ Test 2: Notes Endpoint - FAILED</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test 3: Check filters
+            try {
+                const response = await fetch('http://localhost:5000/api/filters');
+                const data = await response.json();
+                
+                html += `
+                    <div class="test success">
+                        <h3>✅ Test 3: Filters Endpoint - PASSED</h3>
+                        <p><strong>Families:</strong> ${data.families.join(', ')}</p>
+                        <p><strong>Genders:</strong> ${data.genders.join(', ')}</p>
+                    </div>
+                `;
+            } catch (error) {
+                html += `
+                    <div class="test error">
+                        <h3>❌ Test 3: Filters Endpoint - FAILED</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Summary
+            html += `
+                <div class="test">
+                    <h3>📋 Next Steps</h3>
+                    <p><strong>If all tests passed:</strong></p>
+                    <ul>
+                        <li>Backend is working correctly ✅</li>
+                        <li>Open your main application at <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+                        <li>Press F12 in browser, check Console tab for errors</li>
+                    </ul>
+                    <p><strong>If tests failed:</strong></p>
+                    <ul>
+                        <li>Make sure backend is running: <code>cd backend && py app.py</code></li>
+                        <li>Check if port 5000 is available</li>
+                        <li>Try restarting both frontend and backend</li>
+                    </ul>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Auto-run tests on page load
+        window.onload = runTests;
+    </script>
+</body>
+</html>
